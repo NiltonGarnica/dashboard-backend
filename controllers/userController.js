@@ -1,9 +1,11 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
-// Crear usuario
-// Crear usuario
-exports.crearUsuario = async (req, res) => {
+// ------------------------------------------
+// 🚀 CREAR USUARIO
+// ------------------------------------------
+exports.createUser = async (req, res) => {
   try {
     const { nombre, email, password, rol, estado } = req.body;
 
@@ -11,14 +13,13 @@ exports.crearUsuario = async (req, res) => {
     if (existe)
       return res.status(400).json({ mensaje: "El email ya está registrado" });
 
-    // 🔥 Cifrar contraseña antes de guardar
     const salt = bcrypt.genSaltSync(10);
     const hashedPassword = bcrypt.hashSync(password, salt);
 
     const nuevo = new User({
       nombre,
       email,
-      password: hashedPassword, // ← ahora sí cifrada
+      password: hashedPassword,
       rol,
       estado
     });
@@ -33,14 +34,54 @@ exports.crearUsuario = async (req, res) => {
   }
 };
 
-
-// Obtener todos los usuarios
-exports.obtenerUsuarios = async (req, res) => {
-  const usuarios = await User.find();
-  res.json(usuarios);
+// ------------------------------------------
+// 🚀 OBTENER USUARIOS
+// ------------------------------------------
+exports.getUsers = async (req, res) => {
+  try {
+    const usuarios = await User.find().select("-password"); // No mostrar contraseñas
+    res.json(usuarios);
+  } catch (err) {
+    res.status(500).json({ mensaje: "Error al obtener usuarios" });
+  }
 };
 
-// Login
+// ------------------------------------------
+// 🚀 ACTUALIZAR USUARIO
+// ------------------------------------------
+exports.updateUser = async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    const actualizado = await User.findByIdAndUpdate(id, req.body, {
+      new: true
+    }).select("-password");
+
+    res.json({ mensaje: "Usuario actualizado", usuario: actualizado });
+  } catch (err) {
+    res.status(500).json({ mensaje: "Error al actualizar usuario" });
+  }
+};
+
+// ------------------------------------------
+// 🚀 ELIMINAR USUARIO
+// ------------------------------------------
+exports.deleteUser = async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    await User.findByIdAndDelete(id);
+
+    res.json({ mensaje: "Usuario eliminado" });
+
+  } catch (err) {
+    res.status(500).json({ mensaje: "Error al eliminar usuario" });
+  }
+};
+
+// ------------------------------------------
+// 🚀 LOGIN
+// ------------------------------------------
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -53,8 +94,6 @@ exports.login = async (req, res) => {
     if (!esValido)
       return res.status(400).json({ mensaje: "Contraseña incorrecta" });
 
-    // Crear token JWT 🔥
-    const jwt = require("jsonwebtoken");
     const token = jwt.sign(
       { uid: usuario._id, email: usuario.email, rol: usuario.rol },
       process.env.JWT_SECRET,
@@ -63,7 +102,7 @@ exports.login = async (req, res) => {
 
     res.json({
       mensaje: "Login exitoso",
-      token,     // ← Aquí enviamos el token
+      token,
       usuario: {
         id: usuario._id,
         nombre: usuario.nombre,
