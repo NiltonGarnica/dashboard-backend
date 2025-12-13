@@ -36,8 +36,9 @@ mongoose
   .then(() => console.log("✅ Mongo conectado"))
   .catch(err => console.error("❌ Error Mongo:", err));
 
-// Puerto dinámico
+// Puerto dinámico (Render)
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
   console.log(`🚀 Backend corriendo en puerto ${PORT}`);
 });
