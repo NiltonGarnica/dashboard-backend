@@ -1,11 +1,12 @@
 {
   "name": "webbackend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Backend Node.js con Express, MongoDB y JWT",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon index.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
