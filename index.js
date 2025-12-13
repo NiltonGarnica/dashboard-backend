@@ -10,17 +10,11 @@ dotenv.config();
 
 const app = express();
 
-/* 🔥🔥🔥 CORS ABIERTO TOTAL (SIN RESTRICCIONES) */
-app.use(cors());
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-  next();
-});
+/* ✅ CORS SIMPLE Y COMPATIBLE */
+app.use(cors({
+  origin: true, // permite cualquier origen dinámicamente
+  credentials: true
+}));
 
 app.use(express.json());
 
@@ -34,9 +28,8 @@ mongoose
   .then(() => console.log("✅ Mongo conectado"))
   .catch(err => console.error("❌ Error Mongo:", err));
 
-// Puerto Render
+// Puerto
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Backend corriendo en puerto ${PORT}`);
 });
-
