@@ -10,15 +10,19 @@ dotenv.config();
 
 const app = express();
 
-// 🔥 CORS CORRECTO (ESTO ES LO QUE FALTABA)
+// 🔥 CORS CORRECTO (ESTO ARREGLA TODO)
 app.use(cors({
   origin: [
     "http://localhost:4200",
     "https://ngc-webapp.vercel.app"
   ],
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 }));
+
+// 🔥 IMPORTANTE: aceptar OPTIONS
+app.options("*", cors());
 
 app.use(express.json());
 
@@ -27,13 +31,13 @@ app.use("/api/usuarios", userRoutes);
 app.use("/api/excel", excelRoutes);
 
 // MongoDB
-mongoose
-  .connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ Mongo conectado"))
-  .catch((err) => console.error("❌ Error Mongo:", err));
+  .catch(err => console.error("❌ Error Mongo:", err));
 
 // Puerto dinámico
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
   console.log(`🚀 Backend corriendo en puerto ${PORT}`);
 });
