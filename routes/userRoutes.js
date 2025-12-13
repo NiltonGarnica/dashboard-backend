@@ -1,14 +1,21 @@
-const express = require("express");
-const router = express.Router();
-const userCtrl = require("../controllers/userController");
+import { Router } from "express";
+import {
+  createUser,
+  getUsers,
+  updateUser,
+  deleteUser,
+  login
+} from "../controllers/userController.js";
+
+const router = Router();
 
 // CRUD Completo
-router.post("/", userCtrl.createUser);        // Crear usuario
-router.get("/", userCtrl.getUsers);           // Listar usuarios
-router.put("/:id", userCtrl.updateUser);      // Actualizar usuario
-router.delete("/:id", userCtrl.deleteUser);   // Eliminar usuario
+router.post("/", createUser);       // Crear usuario
+router.get("/", getUsers);          // Listar usuarios
+router.put("/:id", updateUser);     // Actualizar usuario
+router.delete("/:id", deleteUser);  // Eliminar usuario
 
-// LOGIN (mantiene el nombre)
-router.post("/login", userCtrl.login);
+// LOGIN
+router.post("/login", login);
 
-module.exports = router;
+export default router;

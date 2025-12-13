@@ -10,21 +10,31 @@ dotenv.config();
 
 const app = express();
 
-// Middlewares
-app.use(cors());
+// ✅ CORS CORRECTO PARA VERCEL + RENDER
+app.use(cors({
+  origin: [
+    "http://localhost:4200",
+    "https://ngc-webapp.vercel.app"
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
+
 app.use(express.json());
 
-// Rutas API
+// Rutas
 app.use("/api/usuarios", userRoutes);
 app.use("/api/excel", excelRoutes);
 
-// Conexión a MongoDB
+// MongoDB
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log("Mongo conectado"))
-  .catch((err) => console.log("Error al conectar Mongo:", err));
+  .then(() => console.log("✅ Mongo conectado"))
+  .catch((err) => console.error("❌ Error Mongo:", err));
 
-// Servidor
-app.listen(3000, () => {
-  console.log("Backend corriendo en http://localhost:3000");
+// Puerto
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`🚀 Backend corriendo en puerto ${PORT}`);
 });

@@ -1,20 +1,21 @@
-const User = require("../models/User");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+import User from "../models/User.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 // ------------------------------------------
 // 🚀 CREAR USUARIO
 // ------------------------------------------
-exports.createUser = async (req, res) => {
+export const createUser = async (req, res) => {
   try {
     const { nombre, email, password, rol, estado } = req.body;
 
     const existe = await User.findOne({ email });
-    if (existe)
+    if (existe) {
       return res.status(400).json({ mensaje: "El email ya está registrado" });
+    }
 
-    const salt = bcrypt.genSaltSync(10);
-    const hashedPassword = bcrypt.hashSync(password, salt);
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     const nuevo = new User({
       nombre,
@@ -26,7 +27,16 @@ exports.createUser = async (req, res) => {
 
     await nuevo.save();
 
-    res.json({ mensaje: "Usuario creado correctamente", usuario: nuevo });
+    res.json({
+      mensaje: "Usuario creado correctamente",
+      usuario: {
+        id: nuevo._id,
+        nombre: nuevo.nombre,
+        email: nuevo.email,
+        rol: nuevo.rol,
+        estado: nuevo.estado
+      }
+    });
 
   } catch (err) {
     console.error(err);
@@ -37,9 +47,9 @@ exports.createUser = async (req, res) => {
 // ------------------------------------------
 // 🚀 OBTENER USUARIOS
 // ------------------------------------------
-exports.getUsers = async (req, res) => {
+export const getUsers = async (req, res) => {
   try {
-    const usuarios = await User.find().select("-password"); // No mostrar contraseñas
+    const usuarios = await User.find().select("-password");
     res.json(usuarios);
   } catch (err) {
     res.status(500).json({ mensaje: "Error al obtener usuarios" });
@@ -49,9 +59,9 @@ exports.getUsers = async (req, res) => {
 // ------------------------------------------
 // 🚀 ACTUALIZAR USUARIO
 // ------------------------------------------
-exports.updateUser = async (req, res) => {
+export const updateUser = async (req, res) => {
   try {
-    const id = req.params.id;
+    const { id } = req.params;
 
     const actualizado = await User.findByIdAndUpdate(id, req.body, {
       new: true
@@ -66,12 +76,11 @@ exports.updateUser = async (req, res) => {
 // ------------------------------------------
 // 🚀 ELIMINAR USUARIO
 // ------------------------------------------
-exports.deleteUser = async (req, res) => {
+export const deleteUser = async (req, res) => {
   try {
-    const id = req.params.id;
+    const { id } = req.params;
 
     await User.findByIdAndDelete(id);
-
     res.json({ mensaje: "Usuario eliminado" });
 
   } catch (err) {
@@ -82,20 +91,22 @@ exports.deleteUser = async (req, res) => {
 // ------------------------------------------
 // 🚀 LOGIN
 // ------------------------------------------
-exports.login = async (req, res) => {
+export const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
     const usuario = await User.findOne({ email });
-    if (!usuario)
+    if (!usuario) {
       return res.status(400).json({ mensaje: "Credenciales inválidas" });
+    }
 
     const esValido = await bcrypt.compare(password, usuario.password);
-    if (!esValido)
+    if (!esValido) {
       return res.status(400).json({ mensaje: "Contraseña incorrecta" });
+    }
 
     const token = jwt.sign(
-      { uid: usuario._id, email: usuario.email, rol: usuario.rol },
+      { uid: usuario._id, rol: usuario.rol },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES }
     );
