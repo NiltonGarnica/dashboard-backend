@@ -10,19 +10,12 @@ dotenv.config();
 
 const app = express();
 
-// 🔥 CORS CORRECTO (ESTO ARREGLA TODO)
+/* 🔥 CORS SIMPLE Y CORRECTO (RENDER FRIENDLY) */
 app.use(cors({
-  origin: [
-    "http://localhost:4200",
-    "https://ngc-webapp.vercel.app"
-  ],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
+  origin: "https://ngc-webapp.vercel.app",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
-
-// 🔥 IMPORTANTE: aceptar OPTIONS
-app.options("*", cors());
 
 app.use(express.json());
 
