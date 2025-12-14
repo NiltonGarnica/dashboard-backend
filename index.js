@@ -10,9 +10,9 @@ dotenv.config();
 
 const app = express();
 
-/* ✅ CORS SIMPLE Y COMPATIBLE */
+// ✅ CORS SOLO LOCAL
 app.use(cors({
-  origin: true, // permite cualquier origen dinámicamente
+  origin: "http://localhost:4200",
   credentials: true
 }));
 
@@ -28,8 +28,7 @@ mongoose
   .then(() => console.log("✅ Mongo conectado"))
   .catch(err => console.error("❌ Error Mongo:", err));
 
-// Puerto
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 app.listen(PORT, () => {
-  console.log(`🚀 Backend corriendo en puerto ${PORT}`);
+  console.log(`🚀 Backend en http://localhost:${PORT}`);
 });
