@@ -29,7 +29,9 @@ router.post("/upload", upload.single("archivo"), async (req, res) => {
       nombre: req.file.originalname,
       columnas: Object.keys(data[0]),
       filas: data,
+      activo: false
     });
+
 
     await dataset.save();
 
@@ -52,5 +54,37 @@ router.get("/", async (req, res) => {
     res.status(500).json({ mensaje: "Error obteniendo datasets" });
   }
 });
+// Marcar dataset como activo
+router.post("/usar/:id", async (req, res) => {
+  try {
+    // Desactivar todos
+    await Dataset.updateMany({}, { activo: false });
+
+    // Activar el seleccionado
+    await Dataset.findByIdAndUpdate(req.params.id, {
+      activo: true
+    });
+
+    res.json({ mensaje: "Dataset activado correctamente" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: "Error activando dataset" });
+  }
+});
+// Obtener dataset activo
+router.get("/activo", async (req, res) => {
+  try {
+    const dataset = await Dataset.findOne({ activo: true });
+
+    if (!dataset) {
+      return res.json(null);
+    }
+
+    res.json(dataset);
+  } catch (error) {
+    res.status(500).json({ mensaje: "Error obteniendo dataset activo" });
+  }
+});
+
 
 export default router;

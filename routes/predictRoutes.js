@@ -5,7 +5,7 @@ import Prediction from "../models/Prediction.js";
 const router = express.Router();
 
 // ======================
-// 🔮 PREDICCIÓN
+// 🔮 PREDICCIÓN SIMPLE (YA FUNCIONA)
 // ======================
 router.post("/predict", async (req, res) => {
   try {
@@ -16,19 +16,23 @@ router.post("/predict", async (req, res) => {
       ingresosReales
     } = req.body;
 
-    // 1️⃣ Llamar a FastAPI (Python)
+    if (
+      gastos == null ||
+      clientes == null ||
+      promociones == null ||
+      ingresosReales == null
+    ) {
+      return res.status(400).json({ error: "Datos incompletos" });
+    }
+
     const response = await axios.post(
       "http://localhost:8000/predict",
       { gastos, clientes, promociones }
     );
 
-    // ✅ FORMA CORRECTA
     const ingresosPredichos = response.data.prediccion_ingresos;
-
-    // 2️⃣ Calcular diferencia
     const diferencia = ingresosPredichos - ingresosReales;
 
-    // 3️⃣ Guardar en MongoDB
     const pred = await Prediction.create({
       gastos,
       clientes,
@@ -38,7 +42,6 @@ router.post("/predict", async (req, res) => {
       diferencia
     });
 
-    // 4️⃣ Respuesta al frontend
     res.json({
       prediccion_ingresos: ingresosPredichos,
       diferencia,
@@ -49,6 +52,34 @@ router.post("/predict", async (req, res) => {
   } catch (error) {
     console.error("❌ Error en predicción:", error);
     res.status(500).json({ error: "Error al predecir" });
+  }
+});
+
+// ======================
+// 🤖 PREDICCIÓN FUTURA MULTIVARIABLE
+// ======================
+router.post("/predict-futuro", async (req, res) => {
+  try {
+    const { historial, meses } = req.body;
+
+    if (!historial || !Array.isArray(historial) || !meses) {
+      return res.status(400).json({ error: "Datos inválidos" });
+    }
+
+    // 🔗 FastAPI (nuevo endpoint)
+    const response = await axios.post(
+      "http://localhost:8000/predict-futuro",
+      { historial, meses }
+    );
+
+    // response.data contiene:
+    // { meses, gastos, clientes, ingresos }
+
+    res.json(response.data);
+
+  } catch (error) {
+    console.error("❌ Error en predicción futura:", error);
+    res.status(500).json({ error: "Error al predecir futuro" });
   }
 });
 

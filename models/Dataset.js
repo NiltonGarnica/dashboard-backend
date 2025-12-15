@@ -14,6 +14,19 @@ const datasetSchema = new mongoose.Schema(
       type: Array,
       required: true,
     },
+
+    // 🔑 NUEVO
+    activo: {
+      type: Boolean,
+      default: false,
+    },
+
+    // (opcional, pero profesional)
+    usuario: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: false,
+    },
   },
   {
     timestamps: true,
@@ -22,5 +35,4 @@ const datasetSchema = new mongoose.Schema(
 );
 
 const Dataset = mongoose.model("Dataset", datasetSchema);
-
 export default Dataset;
